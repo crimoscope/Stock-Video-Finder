@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Video Finder Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(120deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #334155;
+            animation: slideUp 0.6s ease-out 0.05s both;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: transparent;
+            color: #94a3b8;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: #60a5fa;
+            border-bottom-color: #60a5fa;
+        }
+
+        .tab-btn:hover {
+            color: #cbd5e1;
+        }
+
+        .tab-content {
+            display: none;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .search-section {
+            margin-bottom: 40px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            animation: slideUp 0.6s ease-out 0.1s both;
+        }
+
+        textarea {
+            flex: 1;
+            padding: 14px 16px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #60a5fa;
+            background: #0f172a;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+        }
+
+        .input-hint {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 8px;
+        }
+
+        button {
+            padding: 14px 28px;
+            background: linear-gradient(120deg, #60a5fa, #a78bfa);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            align-self: flex-start;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(96, 165, 250, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 10px;
+            min-height: 20px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .status.loading {
+            color: #60a5fa;
+        }
+
+        .status.error {
+            color: #f87171;
+        }
+
+        .status.success {
+            color: #4ade80;
+        }
+
+        .results-section {
+            animation: slideUp 0.6s ease-out 0.2s both;
+        }
+
+        .script-results {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .scene-block {
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+            background: #1e293b;
+            transition: all 0.3s ease;
+        }
+
+        .scene-block:hover {
+            border-color: #60a5fa;
+            box-shadow: 0 8px 20px rgba(96, 165, 250, 0.1);
+        }
+
+        .scene-number {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .scene-description {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #e2e8f0;
+            line-height: 1.4;
+        }
+
+        .platform-group {
+            margin-bottom: 20px;
+        }
+
+        .platform-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .platform-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.7rem;
+            color: white;
+        }
+
+        .pexels-icon { background: linear-gradient(120deg, #60a5fa, #3b82f6); }
+        .pixabay-icon { background: linear-gradient(120deg, #ec4899, #d946ef); }
+        .unsplash-icon { background: linear-gradient(120deg, #10b981, #059669); }
+        .videvo-icon { background: linear-gradient(120deg, #f59e0b, #d97706); }
+        .videezy-icon { background: linear-gradient(120deg, #8b5cf6, #6d28d9); }
+        .coverr-icon { background: linear-gradient(120deg, #06b6d4, #0891b2); }
+
+        .platform-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 10px;
+        }
+
+        .video-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-card:hover {
+            border-color: #60a5fa;
+            box-shadow: 0 6px 16px rgba(96, 165, 250, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .video-preview {
+            width: 100%;
+            height: 130px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #475569;
+        }
+
+        .video-info {
+            padding: 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            line-height: 1.2;
+            color: #e2e8f0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .video-meta {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .video-button {
+            padding: 6px 10px;
+            background: #334155;
+            color: #e2e8f0;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: auto;
+            text-decoration: none;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .video-button:hover {
+            background: #60a5fa;
+            color: white;
+        }
+
+        .no-results {
+            padding: 20px;
+            text-align: center;
+            color: #94a3b8;
+            background: #0f172a;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #334155;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(120deg, #60a5fa, #a78bfa);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .input-wrapper {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                align-self: stretch;
+            }
+
+            .videos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Stock Video Finder Pro</h1>
+            <p class="subtitle">Search free stock video sites. Single scene or entire scripts.</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="single">Single Scene</button>
+            <button class="tab-btn" data-tab="script">Script Parser</button>
+        </div>
+
+        <!-- SINGLE SCENE TAB -->
+        <div class="tab-content active" id="single">
+            <div class="search-section">
+                <div class="input-wrapper">
+                    <textarea id="descriptionInput" placeholder="Describe the video you're looking for. Example: a person running through a foggy forest at sunrise, cinematic, slow motion..."></textarea>
+                    <button id="searchBtn">Search</button>
+                </div>
+                <div class="input-hint">💡 Tip: Be specific about mood, action, and style for better results</div>
+                <div class="status" id="status"></div>
+            </div>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div id="resultsContainer"></div>
+            </div>
+
+            <div class="empty-state" id="emptyState">
+                <div class="empty-state-icon">🎬</div>
+                <p>Enter a description and search to get started</p>
+            </div>
+        </div>
+
+        <!-- SCRIPT PARSER TAB -->
+        <div class="tab-content" id="script">
+            <div class="search-section">
+                <div class="input-wrapper">
+                    <textarea id="scriptInput" placeholder="Paste your script here. Each line will be treated as a scene description.&#10;&#10;Example:&#10;Morning sunrise over mountain landscape&#10;Woman walking through city street&#10;Close-up of coffee being poured&#10;Ocean waves crashing on beach"></textarea>
+                    <button id="parseScriptBtn">Parse Script</button>
+                </div>
+                <div class="input-hint">💡 One scene per line. Tool will find videos for each automatically.</div>
+                <div class="status" id="scriptStatus"></div>
+                <div class="progress-bar" id="progressBar" style="display: none;">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <div class="results-section" id="scriptResultsSection" style="display: none;">
+                <div id="scriptResultsContainer" class="script-results"></div>
+            </div>
+
+            <div class="empty-state" id="scriptEmptyState">
+                <div class="empty-state-icon">📝</div>
+                <p>Paste a script to get started</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                document.getElementById(e.target.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Single scene search
+        const searchBtn = document.getElementById('searchBtn');
+        const descriptionInput = document.getElementById('descriptionInput');
+        const statusDiv = document.getElementById('status');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const emptyState = document.getElementById('emptyState');
+
+        searchBtn.addEventListener('click', () => searchSingle());
+        descriptionInput.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') searchSingle();
+        });
+
+        // Script parser
+        const parseScriptBtn = document.getElementById('parseScriptBtn');
+        const scriptInput = document.getElementById('scriptInput');
+        const scriptStatus = document.getElementById('scriptStatus');
+        const scriptResultsSection = document.getElementById('scriptResultsSection');
+        const scriptResultsContainer = document.getElementById('scriptResultsContainer');
+        const scriptEmptyState = document.getElementById('scriptEmptyState');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+
+        parseScriptBtn.addEventListener('click', parseScript);
+        scriptInput.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') parseScript();
+        });
+
+        // ============== SEARCH FUNCTIONS ==============
+
+        async function searchSingle() {
+            const description = descriptionInput.value.trim();
+            if (!description) {
+                statusDiv.textContent = '⚠️ Please enter a description';
+                statusDiv.className = 'status error';
+                return;
+            }
+
+            searchBtn.disabled = true;
+            statusDiv.innerHTML = '<span class="spinner"></span> Searching...';
+            statusDiv.className = 'status loading';
+            resultsSection.style.display = 'none';
+
+            try {
+                const searchQueries = await generateSearchQueries(description);
+                statusDiv.innerHTML = '<span class="spinner"></span> Searching across 6 platforms...';
+                
+                const results = await searchAllPlatforms(searchQueries);
+                displaySingleResults(results, searchQueries);
+                
+                emptyState.style.display = 'none';
+                resultsSection.style.display = 'block';
+                statusDiv.innerHTML = '✅ Found videos';
+                statusDiv.className = 'status success';
+
+            } catch (error) {
+                console.error('Search error:', error);
+                statusDiv.textContent = '❌ Error: ' + error.message;
+                statusDiv.className = 'status error';
+            } finally {
+                searchBtn.disabled = false;
+            }
+        }
+
+        async function parseScript() {
+            const script = scriptInput.value.trim();
+            if (!script) {
+                scriptStatus.textContent = '⚠️ Please paste a script';
+                scriptStatus.className = 'status error';
+                return;
+            }
+
+            const lines = script.split('\n').filter(line => line.trim().length > 0);
+            if (lines.length === 0) {
+                scriptStatus.textContent = '⚠️ No valid lines found';
+                scriptStatus.className = 'status error';
+                return;
+            }
+
+            parseScriptBtn.disabled = true;
+            progressBar.style.display = 'block';
+            scriptStatus.innerHTML = `<span class="spinner"></span> Processing ${lines.length} scenes...`;
+            scriptStatus.className = 'status loading';
+            scriptResultsSection.style.display = 'none';
+
+            try {
+                scriptResultsContainer.innerHTML = '';
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    const progress = ((i + 1) / lines.length) * 100;
+                    progressFill.style.width = progress + '%';
+
+                    const searchQueries = await generateSearchQueries(line);
+                    const results = await searchAllPlatforms(searchQueries);
+                    
+                    displaySceneBlock(i + 1, line, results, searchQueries);
+                }
+
+                scriptEmptyState.style.display = 'none';
+                scriptResultsSection.style.display = 'block';
+                scriptStatus.innerHTML = `✅ Found videos for all ${lines.length} scenes`;
+                scriptStatus.className = 'status success';
+                progressBar.style.display = 'none';
+
+            } catch (error) {
+                console.error('Script parsing error:', error);
+                scriptStatus.textContent = '❌ Error: ' + error.message;
+                scriptStatus.className = 'status error';
+                progressBar.style.display = 'none';
+            } finally {
+                parseScriptBtn.disabled = false;
+            }
+        }
+
+        // ============== API & SEARCH LOGIC ==============
+
+        async function generateSearchQueries(description) {
+            try {
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514",
+                        max_tokens: 150,
+                        messages: [{
+                            role: "user",
+                            content: `Extract 3-4 concise search keywords from this description. Return ONLY the keywords separated by commas, nothing else. No explanations. Description: "${description}"`
+                        }]
+                    })
+                });
+
+                if (!response.ok) throw new Error('API error');
+                const data = await response.json();
+                return data.content[0].text.split(',').map(k => k.trim()).filter(k => k).slice(0, 3);
+            } catch (error) {
+                console.warn('Claude API fallback:', error);
+                return [description.split(' ').slice(0, 2).join(' ')];
+            }
+        }
+
+        async function searchAllPlatforms(keywords) {
+            const searches = [
+                searchPexels(keywords),
+                searchPixabay(keywords),
+                searchUnsplash(keywords),
+                searchVidevo(keywords),
+                searchVideezy(keywords),
+                searchCoverr(keywords)
+            ];
+
+            const results = await Promise.all(searches);
+            return results;
+        }
+
+        // ============== PLATFORM SEARCHES ==============
+
+        async function searchPexels(keywords) {
+            const results = [];
+            for (const keyword of keywords) {
+                try {
+                    const url = `https://www.pexels.com/api/videos/search?query=${encodeURIComponent(keyword)}&per_page=2`;
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.videos) {
+                            results.push(...data.videos.map(v => ({
+                                platform: 'Pexels',
+                                title: `Video by ${v.user?.name || 'Creator'}`,
+                                duration: v.duration,
+                                link: v.url
+                            })));
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Pexels error:', e);
+                }
+            }
+            return results.slice(0, 4);
+        }
+
+        async function searchPixabay(keywords) {
+            const results = [];
+            for (const keyword of keywords) {
+                try {
+                    const url = `https://pixabay.com/api/videos/?key=demo&q=${encodeURIComponent(keyword)}&per_page=2`;
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.hits) {
+                            results.push(...data.hits.map(v => ({
+                                platform: 'Pixabay',
+                                title: `${keyword} • ${v.user}`,
+                                duration: v.duration,
+                                link: `https://pixabay.com/videos/id${v.id}/`
+                            })));
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Pixabay error:', e);
+                }
+            }
+            return results.slice(0, 4);
+        }
+
+        async function searchUnsplash(keywords) {
+            return keywords.map(keyword => ({
+                platform: 'Unsplash',
+                title: `Search: ${keyword}`,
+                duration: null,
+                link: `https://unsplash.com/search/videos?query=${encodeURIComponent(keyword)}`
+            })).slice(0, 2);
+        }
+
+        async function searchVidevo(keywords) {
+            return keywords.map(keyword => ({
+                platform: 'Videvo',
+                title: `Search: ${keyword}`,
+                duration: null,
+                link: `https://www.videvo.net/search/${encodeURIComponent(keyword)}/`
+            })).slice(0, 2);
+        }
+
+        async function searchVideezy(keywords) {
+            return keywords.map(keyword => ({
+                platform: 'Videezy',
+                title: `Search: ${keyword}`,
+                duration: null,
+                link: `https://www.videezy.com/search?q=${encodeURIComponent(keyword)}`
+            })).slice(0, 2);
+        }
+
+        async function searchCoverr(keywords) {
+            return keywords.map(keyword => ({
+                platform: 'Coverr',
+                title: `Search: ${keyword}`,
+                duration: null,
+                link: `https://coverr.co/?q=${encodeURIComponent(keyword)}`
+            })).slice(0, 2);
+        }
+
+        // ============== DISPLAY FUNCTIONS ==============
+
+        function displaySingleResults(results, queries) {
+            resultsContainer.innerHTML = '';
+            
+            const platforms = [
+                { name: 'Pexels', icon: 'P', class: 'pexels-icon' },
+                { name: 'Pixabay', icon: 'X', class: 'pixabay-icon' },
+                { name: 'Unsplash', icon: 'U', class: 'unsplash-icon' },
+                { name: 'Videvo', icon: 'V', class: 'videvo-icon' },
+                { name: 'Videezy', icon: 'Z', class: 'videezy-icon' },
+                { name: 'Coverr', icon: 'C', class: 'coverr-icon' }
+            ];
+
+            results.forEach((platformResults, idx) => {
+                const platform = platforms[idx];
+                const group = document.createElement('div');
+                group.className = 'platform-group';
+
+                const header = document.createElement('div');
+                header.className = 'platform-header';
+                header.innerHTML = `
+                    <div class="platform-icon ${platform.class}">${platform.icon}</div>
+                    <div class="platform-title">${platform.name}</div>
+                `;
+                group.appendChild(header);
+
+                if (!platformResults || platformResults.length === 0) {
+                    const noResults = document.createElement('div');
+                    noResults.className = 'no-results';
+                    noResults.textContent = `Try searching on ${platform.name} directly`;
+                    group.appendChild(noResults);
+                } else {
+                    const grid = document.createElement('div');
+                    grid.className = 'videos-grid';
+
+                    platformResults.forEach(video => {
+                        const card = document.createElement('a');
+                        card.className = 'video-card';
+                        card.href = video.link;
+                        card.target = '_blank';
+                        card.rel = 'noopener noreferrer';
+                        card.innerHTML = `
+                            <div class="video-preview">🎥</div>
+                            <div class="video-info">
+                                <div class="video-title">${video.title}</div>
+                                ${video.duration ? `<div class="video-meta">${video.duration}s</div>` : ''}
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+
+                    group.appendChild(grid);
+                }
+
+                resultsContainer.appendChild(group);
+            });
+        }
+
+        function displaySceneBlock(sceneNum, description, results, queries) {
+            const block = document.createElement('div');
+            block.className = 'scene-block';
+            block.innerHTML = `<div class="scene-number">Scene ${sceneNum}</div><div class="scene-description">${description}</div>`;
+
+            const platforms = [
+                { name: 'Pexels', icon: 'P', class: 'pexels-icon' },
+                { name: 'Pixabay', icon: 'X', class: 'pixabay-icon' },
+                { name: 'Unsplash', icon: 'U', class: 'unsplash-icon' },
+                { name: 'Videvo', icon: 'V', class: 'videvo-icon' },
+                { name: 'Videezy', icon: 'Z', class: 'videezy-icon' },
+                { name: 'Coverr', icon: 'C', class: 'coverr-icon' }
+            ];
+
+            results.forEach((platformResults, idx) => {
+                const platform = platforms[idx];
+                const group = document.createElement('div');
+                group.className = 'platform-group';
+
+                const header = document.createElement('div');
+                header.className = 'platform-header';
+                header.innerHTML = `
+                    <div class="platform-icon ${platform.class}">${platform.icon}</div>
+                    <div class="platform-title">${platform.name}</div>
+                `;
+                group.appendChild(header);
+
+                if (!platformResults || platformResults.length === 0) {
+                    const noResults = document.createElement('div');
+                    noResults.className = 'no-results';
+                    noResults.textContent = `No results - visit ${platform.name}`;
+                    group.appendChild(noResults);
+                } else {
+                    const grid = document.createElement('div');
+                    grid.className = 'videos-grid';
+
+                    platformResults.forEach(video => {
+                        const card = document.createElement('a');
+                        card.className = 'video-card';
+                        card.href = video.link;
+                        card.target = '_blank';
+                        card.rel = 'noopener noreferrer';
+                        card.innerHTML = `
+                            <div class="video-preview">🎥</div>
+                            <div class="video-info">
+                                <div class="video-title">${video.title}</div>
+                                ${video.duration ? `<div class="video-meta">${video.duration}s</div>` : ''}
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+
+                    group.appendChild(grid);
+                }
+
+                block.appendChild(group);
+            });
+
+            scriptResultsContainer.appendChild(block);
+        }
+    </script>
+</body>
+</html>
